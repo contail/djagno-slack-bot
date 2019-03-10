@@ -5,7 +5,7 @@ from django.conf import settings
 from slackclient import SlackClient                               
 import random
 from push.views import *
-
+from aws.views import *
 SLACK_VERIFICATION_TOKEN = getattr(settings, 'SLACK_VERIFICATION_TOKEN', None)
 SLACK_BOT_USER_TOKEN = getattr(settings, 'SLACK_BOT_USER_TOKEN', None)                                     
 Client = SlackClient(SLACK_BOT_USER_TOKEN)                        
@@ -62,7 +62,12 @@ class Events(APIView):
                 elif '자기소개' in text.lower():
                     bot_text = '<@{}> \n'.format(user) + self.introduce                              
                 elif '운세' in text.lower():
-                    bot_text = '<@{0}> {1} '.format(user, random.choice(self.luck_list))                                    
+                    bot_text = '<@{0}> {1} '.format(user, random.choice(self.luck_list))   
+
+                elif '웹서버 몇대야' in text.lower():
+                    aws = AWS()
+                    aws_count = aws._get_web_server_count()
+                    bot_text = '<@{0}> {1} '.format(user, aws_count)                                
                 
                 elif '푸시 정보' in text.lower():
                     push_info =Push()

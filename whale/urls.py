@@ -17,9 +17,11 @@ from django.conf.urls import url
 from django.contrib import admin
 from events.views import Events                                    
 from push.views import Push
+from aws.views import AWS
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^events/', Events.as_view()),               
-    url(r'^push/', Push.as_view()),            
+    url(r'^push/', Push.as_view()),
+    url(r'^aws/', AWS.as_view()),            
 ]
