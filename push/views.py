@@ -18,7 +18,7 @@ class Push(APIView):
 
     def _get_push_list(self):
         import requests
-        url = 'https://cobak.co.kr/whale/today_push_list'
+        url = 'https://cobak.co.kr/api/whale/today_push_list/'
         data = requests.get(url).json()
         text ="\n==========오늘의 푸시 정보==========\n"
         push_info = ""
@@ -34,7 +34,7 @@ class Push(APIView):
 
     def _get_push_result(self):
         import requests
-        url = 'https://cobak.co.kr/whale/push_result'
+        url = 'https://cobak.co.kr/api/whale/push_result/'
         data = requests.get(url).json()
         text ="\n==========최근 푸시 결과==========\n"
         push_info = ""
