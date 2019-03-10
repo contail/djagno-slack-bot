@@ -27,8 +27,8 @@ class Events(APIView):
          
         slack_message = request.data
         
-        # if slack_message.get('token') != SLACK_VERIFICATION_TOKEN:
-        #     return Response(status=status.HTTP_403_FORBIDDEN)
+        if slack_message.get('token') != SLACK_VERIFICATION_TOKEN:
+            return Response(status=status.HTTP_403_FORBIDDEN)
         
         # if slack_message.get('type') == 'url_verification':
         #     return Response(data=slack_message, status=status.HTTP_200_OK)
