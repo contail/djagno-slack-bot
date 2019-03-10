@@ -18,19 +18,22 @@ class Events(APIView):
     introduce = """
     안녕하세요~ 제이름은 고래입니다 :whale:
     현재 가능한 명령어는
-    운세, 푸시 정보, 푸시 결과 입니다.
+    '운세', '푸시 정보', '푸시 결과','웹서버 몇대야' 입니다.
     지속적으로 업데이트 중입니다! 
     감사합니다~ 
     """
 
     def post(self, request, *args, **kwargs):
-        
-        
+         
         slack_message = request.data
+        
+        # if slack_message.get('token') != SLACK_VERIFICATION_TOKEN:
+        #     return Response(status=status.HTTP_403_FORBIDDEN)
+        
+        # if slack_message.get('type') == 'url_verification':
+        #     return Response(data=slack_message, status=status.HTTP_200_OK)
 
-        if slack_message.get('token') != SLACK_VERIFICATION_TOKEN:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
+        print(slack_message,"======")
         # greet bot
         if 'event' in slack_message:                               
             event_message = slack_message.get('event')             
@@ -74,7 +77,7 @@ class Events(APIView):
                     result = push_info._get_push_list()
                     bot_text = '<@{0}> {1} '.format(user, result)   
                 
-                elif '푸시 결과' in text.lower():
+                elif '푸시 결과' == text.lower():
                     push_info =Push()
                     result = push_info._get_push_result()
                     bot_text = '<@{0}> {1} '.format(user, result)   
@@ -82,6 +85,17 @@ class Events(APIView):
                 Client.api_call(method='chat.postMessage',         
                                 channel=channel,                   
                                 text=bot_text)                   
-                return Response(status=status.HTTP_200_OK)         
+                return Response(status=status.HTTP_200_OK)   
+        if 'payload' in slack_message:
+            if slack_message['payload'].get('attachments'):
+                Client.api_call(method='chat.postMessage',         
+                                    channel=slack_message['channel'],                   
+                                    text=slack_message['text'],
+                                    attachments = slack_message['payload']['attachments'])
+            else:
+                Client.api_call(method='chat.postMessage',         
+                                    channel=slack_message['channel'],                   
+                                    text=slack_message['text'])
+
 
         return Response(status=status.HTTP_200_OK)
