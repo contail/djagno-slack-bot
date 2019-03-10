@@ -15,9 +15,14 @@ class Events(APIView):
     hello_list = ['안녕하세요~', '어서오세요~', '반가워요~']
     goobye_list = ['잘가요 ㅠㅠ', '안녕히가세요 ㅜㅜ']
     luck_list = ['오늘은 운세가 좋아요!!', '오늘은 그럭저럭이네요~~', '오늘은 최악이에요 ㅜㅜ']
+    introduce = """
+    안녕하세요~ 제이름은 고래입니다 :whale:
+    현재 가능한 명령어는
+    운세, 푸시 정보, 푸시 결과 입니다.
+    지속적으로 업데이트 중입니다! 
+    감사합니다~ 
+    """
 
-
-    
     def post(self, request, *args, **kwargs):
         
         
@@ -53,7 +58,9 @@ class Events(APIView):
             else:
                 print(text,)
                 if '안녕' in text.lower():
-                    bot_text = '<@{}> 반가워요! :wave:'.format(user)                                    
+                    bot_text = '<@{}> 반가워요! :wave:'.format(user)  
+                elif '자기소개' in text.lower():
+                    bot_text = '<@{}> \n'.format(user) + self.introduce                              
                 elif '운세' in text.lower():
                     bot_text = '<@{0}> {1} '.format(user, random.choice(self.luck_list))                                    
                 
