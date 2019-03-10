@@ -18,7 +18,7 @@ class Events(APIView):
     introduce = """
     안녕하세요~ 제이름은 고래입니다 :whale:
     현재 가능한 명령어는
-    '운세', '푸시 정보', '푸시 결과','웹서버 몇대야' 입니다.
+    '운세', '푸시 정보', '푸시 결과', '웹서버 몇대야' 입니다.
     지속적으로 업데이트 중입니다! 
     감사합니다~ 
     """
@@ -80,14 +80,20 @@ class Events(APIView):
                 elif '푸시 결과' in text.lower():
                     push_info =Push()
                     result = push_info._get_push_result()
-                    bot_text = '<@{0}> {1} '.format(user, result)   
+                    bot_text = '<@{0}> {1} '.format(user, result)
+                elif '서버 상태' in text.lower():
+                    aws = AWS()
+                    payload = aws._get_server_status()
+                    print(payload)
 
                 Client.api_call(method='chat.postMessage',         
                                 channel=channel,                   
-                                text=bot_text)                   
+                                text="서버상태",
+                                attachments=payload['attachments'])                   
                 return Response(status=status.HTTP_200_OK)   
         if 'payload' in slack_message:
             if slack_message['payload'].get('attachments'):
+                print(slack_message['payload'])
                 Client.api_call(method='chat.postMessage',         
                                     channel=slack_message['channel'],                   
                                     text=slack_message['text'],
