@@ -3,29 +3,29 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.conf import settings
 from slackclient import SlackClient                               
-
+import random
+from push.views import *
 
 SLACK_VERIFICATION_TOKEN = getattr(settings, 'SLACK_VERIFICATION_TOKEN', None)
-SLACK_BOT_USER_TOKEN = getattr(settings,                          
-'SLACK_BOT_USER_TOKEN', None)                                     
+SLACK_BOT_USER_TOKEN = getattr(settings, 'SLACK_BOT_USER_TOKEN', None)                                     
 Client = SlackClient(SLACK_BOT_USER_TOKEN)                        
 
-
 class Events(APIView):
+
+    hello_list = ['안녕하세요~', '어서오세요~', '반가워요~']
+    goobye_list = ['잘가요 ㅠㅠ', '안녕히가세요 ㅜㅜ']
+    luck_list = ['오늘은 운세가 좋아요!!', '오늘은 그럭저럭이네요~~', '오늘은 최악이에요 ㅜㅜ']
+
+
+    
     def post(self, request, *args, **kwargs):
         
-        print(request)
+        
         slack_message = request.data
 
         if slack_message.get('token') != SLACK_VERIFICATION_TOKEN:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-        print(slack_message)
-
-        # verification challenge
-        if slack_message.get('type') == 'url_verification':
-            return Response(data=slack_message,
-                            status=status.HTTP_200_OK)
         # greet bot
         if 'event' in slack_message:                               
             event_message = slack_message.get('event')             
@@ -37,11 +37,36 @@ class Events(APIView):
             # process user's message
             user = event_message.get('user')                       
             text = event_message.get('text')   
-                                
-            channel = event_message.get('channel')                 
-            print(text,)
-            bot_text = 'Hi <@{}> :wave:'.format(user)             
-            if 'hi' in text.lower():                               
+            channel = event_message.get('channel')      
+
+            if event_message.get('type') == 'member_left_channel':
+                Client.api_call(method='chat.postMessage',         
+                                    channel=channel,                   
+                                    text=random.choice(self.goobye_list))                      
+                return Response(status=status.HTTP_200_OK)    
+
+            elif event_message.get('type') == 'member_joined_channel':
+                Client.api_call(method='chat.postMessage',         
+                                    channel=channel,                   
+                                    text=random.choice(self.hello_list))                   
+                return Response(status=status.HTTP_200_OK) 
+            else:
+                print(text,)
+                if '안녕' in text.lower():
+                    bot_text = '<@{}> 반가워요! :wave:'.format(user)                                    
+                elif '운세' in text.lower():
+                    bot_text = '<@{0}> {1} '.format(user, random.choice(self.luck_list))                                    
+                
+                elif '푸시 정보' in text.lower():
+                    push_info =Push()
+                    result = push_info._get_push_list()
+                    bot_text = '<@{0}> {1} '.format(user, result)   
+                
+                elif '푸시 결과' in text.lower():
+                    push_info =Push()
+                    result = push_info._get_push_result()
+                    bot_text = '<@{0}> {1} '.format(user, result)   
+
                 Client.api_call(method='chat.postMessage',         
                                 channel=channel,                   
                                 text=bot_text)                   
