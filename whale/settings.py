@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'events',
     'push',
+    'aws',
     'rest_framework',
 ]
 
