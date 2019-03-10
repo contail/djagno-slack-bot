@@ -25,9 +25,9 @@ class Push(APIView):
         if data['data'] is None:
             return u"\n 예약된 푸시가 없습니다!"
         for row in data['data']:
-            push_info+="제목: {0}".format(row['title'])
+            push_info+="*제목*: {0}".format(row['title'])
             push_info+="\n"
-            push_info+="예약시간: {0}".format(row['reservation_time'])
+            push_info+="*예약시간*: {0}".format(row['reservation_time'])
             push_info+="\n"
         text += push_info
         return text
@@ -41,15 +41,15 @@ class Push(APIView):
         if data['data'] is None:
             return u"\n 최근에 예약된 푸시가 없습니다!"
         for row in data['data']:
-            push_info+="제목: {0}".format(row['title'])
+            push_info+="*제목*: {0}".format(row['title'])
             push_info+="\n"
-            push_info+="발송시간: {0}".format(row['push_time'])
+            push_info+="*발송시간*: {0}".format(row['push_time'])
             push_info+="\n"
-            push_info+="ping_count: {0}".format(row['ping'])
+            push_info+="*ping_count*: {0}".format(row['ping'])
             push_info+="\n"
-            push_info+="pong_count: {0}".format(row['pong'])
+            push_info+="*pong_count*: {0}".format(row['pong'])
             push_info+="\n"
-            push_info+="오픈비율: {0}".format(row['rate'])
+            push_info+="*오픈비율*: {0}".format(row['rate'])
             push_info+="\n"
             push_info+="====================\n"
         text += push_info
