@@ -77,7 +77,7 @@ class Events(APIView):
                     result = push_info._get_push_list()
                     bot_text = '<@{0}> {1} '.format(user, result)   
                 
-                elif '푸시 결과' == text.lower():
+                elif '푸시 결과' in text.lower():
                     push_info =Push()
                     result = push_info._get_push_result()
                     bot_text = '<@{0}> {1} '.format(user, result)   
