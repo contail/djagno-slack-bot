@@ -85,11 +85,15 @@ class Events(APIView):
                     aws = AWS()
                     payload = aws._get_server_status()
                     print(payload)
-
+                
+                    Client.api_call(method='chat.postMessage',         
+                                    channel=channel,                   
+                                    text="서버상태",
+                                    attachments=payload['attachments'])  
+                    return Response(status=status.HTTP_200_OK)   
                 Client.api_call(method='chat.postMessage',         
                                 channel=channel,                   
-                                text="서버상태",
-                                attachments=payload['attachments'])                   
+                                text=bot_text)                 
                 return Response(status=status.HTTP_200_OK)   
         if 'payload' in slack_message:
             if slack_message['payload'].get('attachments'):
