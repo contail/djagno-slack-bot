@@ -1,23 +1,9 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.conf import settings
-from slackclient import SlackClient                               
 import random
+import requests
 
-SLACK_VERIFICATION_TOKEN = getattr(settings, 'SLACK_VERIFICATION_TOKEN', None)
-SLACK_BOT_USER_TOKEN = getattr(settings, 'SLACK_BOT_USER_TOKEN', None)                                     
-Client = SlackClient(SLACK_BOT_USER_TOKEN)                        
-
-class Push(APIView):
-
-    def post(self, request, *args, **kwargs):
-
-        print(request.data)
-        pass
+class Push():
 
     def _get_push_list(self):
-        import requests
         url = 'https://cobak.co.kr/api/whale/today_push_list/'
         data = requests.get(url).json()
         text ="\n==========오늘의 푸시 정보==========\n"
@@ -33,7 +19,6 @@ class Push(APIView):
         return text
 
     def _get_push_result(self):
-        import requests
         url = 'https://cobak.co.kr/api/whale/push_result/'
         data = requests.get(url).json()
         text ="\n==========최근 푸시 결과==========\n"

@@ -94,7 +94,7 @@ class Events(APIView):
                 Client.api_call(method='chat.postMessage',         
                                 channel=channel,                   
                                 text=bot_text)                 
-                return Response(status=status.HTTP_200_OK)   
+            return Response(status=status.HTTP_200_OK)   
         if 'payload' in slack_message:
             if slack_message['payload'].get('attachments'):
                 print(slack_message['payload'])
