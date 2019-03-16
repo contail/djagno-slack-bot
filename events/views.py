@@ -59,8 +59,8 @@ class Events(APIView):
                 return Response(status=status.HTTP_200_OK) 
             else:
                 print(text,)
-                if '안녕' in text.lower():
-                    bot_text = '<@{}> 반가워요! :wave:'.format(user)  
+                if '안녕' in text.lower() or '인사' in text.lower():
+                    bot_text = '<@{}> 반가워요! :wave: 고래에요~ :whale:'.format(user)
                 elif '자기소개' in text.lower():
                     bot_text = '<@{}> \n'.format(user) + self.introduce                              
                 elif '운세' in text.lower():
