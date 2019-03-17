@@ -89,7 +89,7 @@ class Weather():
             pm25_grade = self.convert_grade_to_emotion(self.convert_pm25_value_to_grade(int(pm25_value)))
             pm25_set_value = pm25_grade + " " + str(pm25_value) + self.unit
 
-            value = "미세먼지"+pm10_set_value + " 초미세먼지" + pm25_set_value
+            value = "미세먼지 "+pm10_set_value + "\n 초미세먼지 " + pm25_set_value
             self.set_sido_fields(city_name, value)
         return True, self.set_payload(sido_name + " {0} 기준".format(date_time), self.fields)
         # except:
