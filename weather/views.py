@@ -4,8 +4,9 @@ from requests.adapters import HTTPAdapter
 from urllib3 import Retry           
 import requests
 class Weather():
-    __API_BASE_URL = 'http://openapi.airkorea.or.kr/openapi/services/rest/ArpltnInforInqireSvc/' \
-                     'getMsrstnAcctoRltmMesureDnsty?ServiceKey={}&ver=1.3&dataTerm=month&pageNo=1&numOfRows=10&_returnType=json'.format(OPEN_DATA_API_KEY)
+    __API_BASE_URL = 'http://openapi.airkorea.or.kr/openapi/services/rest/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty?' \
+                     'serviceKey={}&' \
+                     '&dataTerm=DAILY&ver=1.3'.format(OPEN_DATA_API_KEY)
 
     def __init__(self, api_base_url=__API_BASE_URL):            
         self.fields = []
@@ -24,24 +25,37 @@ class Weather():
                 time.sleep(2)
                 return
             response.raise_for_status()
+
             content = json.loads(response.content.decode('utf-8'))
+            # print(content)
             return content
         except Exception as e:
             raise
 
     def get_area_name(self, station_name):
-        api_url = "{}&stationName={}".format(self.__API_BASE_URL,station_name)
+        station_name = str(station_name)
+        api_url = "{}&stationName={}&_returnType=json".format(self.__API_BASE_URL,station_name)
+        print(api_url)
+        import requests
+        # print(requests.get(api_url).json())
         data = self.__request(api_url)
+        print(data['list'])
         try:
             if len(data['list']) != 0:
                 current_time = data['list'][0]['dataTime']
                 pm10_value = data['list'][0]['pm10Value']
                 pm25_value = data['list'][0]['pm25Value']
-                pm10_grade = self.convert_grade_to_emotion(self.convert_pm10_value_to_grade(int(pm10_value)))
-                pm25_grade = self.convert_grade_to_emotion(self.convert_pm25_value_to_grade(int(pm25_value)))
                 unit = '㎍/㎥'
-                pm10_set_value = pm10_grade + " " + str(pm10_value) + unit
-                pm25_set_value = pm25_grade + " " + str(pm25_value) + unit
+                if pm10_value != "-":
+                    pm10_grade = self.convert_grade_to_emotion(self.convert_pm10_value_to_grade(int(pm10_value)))
+                    pm10_set_value = pm10_grade + " " + str(pm10_value) + unit
+                else:
+                    pm10_set_value = " 정보없음!"
+                if pm25_value !="-":
+                    pm25_grade = self.convert_grade_to_emotion(self.convert_pm25_value_to_grade(int(pm25_value)))
+                    pm25_set_value = pm25_grade + " " + str(pm25_value) + unit
+                else:
+                    pm25_set_value = " 정보없음!"
                 self.set_fields("미세먼지", pm10_set_value)
                 self.set_fields("초미세먼지", pm25_set_value)
                 return True, self.set_payload(station_name + " {0} 기준".format(current_time), self.fields)
