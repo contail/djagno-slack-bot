@@ -44,6 +44,7 @@ class Weather():
         # print(requests.get(api_url).json())
         data = self.__request(api_url)
         print(data['list'])
+        units = ":heart_eyes:(좋아요), :thinking_face:(보통) :sob:(나쁨),:scream:(매우나쁨)"
         try:
             if len(data['list']) != 0:
                 current_time = data['list'][0]['dataTime']
@@ -62,7 +63,7 @@ class Weather():
                     pm25_set_value = " 정보없음!"
                 self.set_fields("미세먼지", pm10_set_value)
                 self.set_fields("초미세먼지", pm25_set_value)
-                return True, self.set_payload(station_name + " {0} 기준".format(current_time), self.fields)
+                return True, self.set_payload(station_name + " {0} 기준 \n {1} \n".format(current_time, units), self.fields)
             else:
                 return False, 0
         except:
@@ -77,6 +78,8 @@ class Weather():
         print(data)
         date_time = None
         # try:
+        units =":heart_eyes:(좋아요), :thinking_face:(보통) :sob:(나쁨),:scream:(매우나쁨)"
+        #self.set_sido_fields("단위", units)
         for row in data['list']:
             print(row)
             city_name = row['cityName']
@@ -85,13 +88,13 @@ class Weather():
             date_time = row['dataTime']
             print(city_name, pm10_value)
             pm10_grade = self.convert_grade_to_emotion(self.convert_pm10_value_to_grade(int(pm10_value)))
-            pm10_set_value = pm10_grade + " " + str(pm10_value) + self.unit
+            pm10_set_value = pm10_grade + "({0}{1}) ".format(str(pm10_value), self.unit)
             pm25_grade = self.convert_grade_to_emotion(self.convert_pm25_value_to_grade(int(pm25_value)))
-            pm25_set_value = pm25_grade + " " + str(pm25_value) + self.unit
+            pm25_set_value = pm25_grade + "({0}{1}) ".format(str(pm25_value), self.unit)
 
             value = "미세먼지 "+pm10_set_value + "\n 초미세먼지 " + pm25_set_value
             self.set_sido_fields(city_name, value)
-        return True, self.set_payload(sido_name + " {0} 기준".format(date_time), self.fields)
+        return True, self.set_payload(sido_name + " {0} 기준 \n {1} \n".format(date_time,units), self.fields)
         # except:
         #     return False, 0
 
@@ -118,13 +121,13 @@ class Weather():
     def convert_grade_to_emotion(self, grade):
 
         if grade == 0:
-            return "좋아요 :heart_eyes:"
+            return ":heart_eyes:"
         elif grade == 1:
-            return "보통 :thinking_face:"
+            return ":thinking_face:"
         elif grade == 2:
-            return "나쁨 :sob:"
+            return ":sob:"
         else:
-            return "매우나쁨 :scream:"
+            return ":scream:"
 
     def all_area_list(self, area):
         area_list = ['서울', '부산', '대구', '인천', '광주', '대전', '울산', '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주', '세종']
@@ -144,6 +147,7 @@ class Weather():
         self.fields.append({
             "title": title,
             "value": value,
+
         })
 
     def set_sido_fields(self, title, value):
