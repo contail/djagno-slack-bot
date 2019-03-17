@@ -90,12 +90,16 @@ class Events(APIView):
                     return Response(status=status.HTTP_200_OK)  
                 elif '미세먼지' in text.lower():
                     area_split = text.split("미세먼지")[1]
+                    area_split = str(area_split).strip()
                     ment = "해당 측정소를 찾지 못했어요~ 정확한 측정소는 아래 사이트에서 확인해주세요!\
                                             http://www.airkorea.or.kr/web/stationInfo?pMENU_NO=93"
                     bot_text = '<@{0}> {1}'.format(user, ment)
                     if area_split is not None:
                         weather = Weather()
-                        result, payload = weather.get_area_name(str(area_split).strip())
+                        if weather.all_area_list(area_split):
+                            result, payload = weather.get_sido_name_value(area_split)
+                        else:
+                            result, payload = weather.get_station_name_value(area_split)
                         if result:
                             bot_text = '<@{0}>'.format(user)
                             Client.api_call(method='chat.postMessage',

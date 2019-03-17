@@ -4,9 +4,10 @@ from requests.adapters import HTTPAdapter
 from urllib3 import Retry           
 import requests
 class Weather():
-    __API_BASE_URL = 'http://openapi.airkorea.or.kr/openapi/services/rest/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty?' \
-                     'serviceKey={}&' \
-                     '&dataTerm=DAILY&ver=1.3'.format(OPEN_DATA_API_KEY)
+    __API_BASE_URL = 'http://openapi.airkorea.or.kr/openapi/services/' \
+                     'rest/ArpltnInforInqireSvc/{}?' \
+                     'serviceKey={}' \
+                     '&{}&ver=1.3'
 
     def __init__(self, api_base_url=__API_BASE_URL):            
         self.fields = []
@@ -15,6 +16,7 @@ class Weather():
         self.session = requests.Session()
         retries = Retry(total=5, backoff_factor=0.5, status_forcelist=[502, 503, 504])
         self.session.mount('http://', HTTPAdapter(max_retries=retries))
+        self.unit = '㎍/㎥'
 
     def __request(self, url):
         import json
@@ -32,9 +34,11 @@ class Weather():
         except Exception as e:
             raise
 
-    def get_area_name(self, station_name):
+    def get_station_name_value(self, station_name):
         station_name = str(station_name)
-        api_url = "{}&stationName={}&_returnType=json".format(self.__API_BASE_URL,station_name)
+        condition = "getMsrstnAcctoRltmMesureDnsty"
+        api_url = "{}&stationName={}&_returnType=json".format(self.__API_BASE_URL.format
+                                                              (condition,OPEN_DATA_API_KEY,'dataTerm=DAILY'),station_name)
         print(api_url)
         import requests
         # print(requests.get(api_url).json())
@@ -45,15 +49,15 @@ class Weather():
                 current_time = data['list'][0]['dataTime']
                 pm10_value = data['list'][0]['pm10Value']
                 pm25_value = data['list'][0]['pm25Value']
-                unit = '㎍/㎥'
+
                 if pm10_value != "-":
                     pm10_grade = self.convert_grade_to_emotion(self.convert_pm10_value_to_grade(int(pm10_value)))
-                    pm10_set_value = pm10_grade + " " + str(pm10_value) + unit
+                    pm10_set_value = pm10_grade + " " + str(pm10_value) + self.unit
                 else:
                     pm10_set_value = " 정보없음!"
                 if pm25_value !="-":
                     pm25_grade = self.convert_grade_to_emotion(self.convert_pm25_value_to_grade(int(pm25_value)))
-                    pm25_set_value = pm25_grade + " " + str(pm25_value) + unit
+                    pm25_set_value = pm25_grade + " " + str(pm25_value) + self.unit
                 else:
                     pm25_set_value = " 정보없음!"
                 self.set_fields("미세먼지", pm10_set_value)
@@ -63,6 +67,33 @@ class Weather():
                 return False, 0
         except:
             return False, 0
+    def get_sido_name_value(self, sido_name):
+
+        condition = "getCtprvnMesureSidoLIst"
+        api_url = "{}&sidoName={}&numOfRows=20&_returnType=json".format(self.__API_BASE_URL.format
+                                                              (condition, OPEN_DATA_API_KEY,'searchCondition=HOUR'),
+                                                              sido_name)
+        data = self.__request(api_url)
+        print(data)
+        date_time = None
+        # try:
+        for row in data['list']:
+            print(row)
+            city_name = row['cityName']
+            pm10_value = row['pm10Value']
+            pm25_value = row['pm25Value']
+            date_time = row['dataTime']
+            print(city_name, pm10_value)
+            pm10_grade = self.convert_grade_to_emotion(self.convert_pm10_value_to_grade(int(pm10_value)))
+            pm10_set_value = pm10_grade + " " + str(pm10_value) + self.unit
+            pm25_grade = self.convert_grade_to_emotion(self.convert_pm25_value_to_grade(int(pm25_value)))
+            pm25_set_value = pm25_grade + " " + str(pm25_value) + self.unit
+
+            value = "미세먼지"+pm10_set_value + " 초미세먼지" + pm25_set_value
+            self.set_sido_fields(city_name, value)
+        return True, self.set_payload(sido_name + " {0} 기준".format(date_time), self.fields)
+        # except:
+        #     return False, 0
 
     def convert_pm10_value_to_grade(self, pm10_value):
         if pm10_value <= 30:
@@ -95,10 +126,12 @@ class Weather():
         else:
             return "매우나쁨 :scream:"
 
-    def all_area_list(self,):
+    def all_area_list(self, area):
         area_list = ['서울', '부산', '대구', '인천', '광주', '대전', '울산', '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주', '세종']
-        
-        pass
+        if area in area_list:
+            return True
+        else:
+            return False
 
     #TODO: 나중에 디테일 작업 해주기
     def detail_area_list(self):
@@ -111,6 +144,13 @@ class Weather():
         self.fields.append({
             "title": title,
             "value": value,
+        })
+
+    def set_sido_fields(self, title, value):
+        self.fields.append({
+            "title": title,
+            "value": value,
+            "short": True,
         })
 
     def set_payload(self, title, fields=[]):
