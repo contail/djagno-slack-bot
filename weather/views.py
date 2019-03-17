@@ -1,9 +1,13 @@
 import random
-from whale.settings import OPEN_DATA_API_KEY      
+
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from whale.settings import OPEN_DATA_API_KEY
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry           
 import requests
-class Weather():
+class Weather(APIView):
     __API_BASE_URL = 'http://openapi.airkorea.or.kr/openapi/services/' \
                      'rest/ArpltnInforInqireSvc/{}?' \
                      'serviceKey={}' \
@@ -17,6 +21,34 @@ class Weather():
         retries = Retry(total=5, backoff_factor=0.5, status_forcelist=[502, 503, 504])
         self.session.mount('http://', HTTPAdapter(max_retries=retries))
         self.unit = '㎍/㎥'
+        self.units = ":heart_eyes:(좋아요), :thinking_face:(보통) :sob:(나쁨),:scream:(매우나쁨)"
+        self.area_list = ['서울', '부산', '대구', '인천', '광주', '대전', '울산', '경기', '강원', '충북', '충남',
+                     '전북', '전남', '경북', '경남', '제주','세종']
+        self.eng_list = ["seoul","busan","daegu","incheon","gwangju","daejeon","ulsan","gyeonggi","gangwon","chungbuk",
+                    "chungnam","jeonbuk","jeonnam","gyeongbuk","gyeongnam","jeju","sejong"]
+
+    def get(self, request, format=None):
+        """
+        Return a list of city dust Value
+        """
+        condition = "getCtprvnMesureLIst"
+        api_url = "{}&itemCode={}&searchCondition={}&_returnType=json".format(self.__API_BASE_URL.format
+                                                              (condition, OPEN_DATA_API_KEY, 'dataGubun=HOUR'),
+                                                              "PM10","WEEK")
+
+        data = self.__request(api_url)
+        print(data['list'])
+        date_time = None
+        for key, value in data['list'][0].items():
+
+            if key == "dataTime":
+                date_time = value
+            elif self.check_city_in_eng_arr(key):
+                city_name, value = self.get_all_area_value(key,value)
+                print(city_name, value)
+                self.set_sido_fields(city_name, value)
+
+        return Response({'list':self.set_payload("오늘의 아침 미세먼지입니다~ {0} 기준 \n {1} \n".format(date_time, self.units), self.fields)}, status=status.HTTP_200_OK)
 
     def __request(self, url):
         import json
@@ -39,12 +71,9 @@ class Weather():
         condition = "getMsrstnAcctoRltmMesureDnsty"
         api_url = "{}&stationName={}&_returnType=json".format(self.__API_BASE_URL.format
                                                               (condition,OPEN_DATA_API_KEY,'dataTerm=DAILY'),station_name)
-        print(api_url)
-        import requests
-        # print(requests.get(api_url).json())
+
         data = self.__request(api_url)
-        print(data['list'])
-        units = ":heart_eyes:(좋아요), :thinking_face:(보통) :sob:(나쁨),:scream:(매우나쁨)"
+
         try:
             if len(data['list']) != 0:
                 current_time = data['list'][0]['dataTime']
@@ -63,7 +92,7 @@ class Weather():
                     pm25_set_value = " 정보없음!"
                 self.set_fields("미세먼지", pm10_set_value)
                 self.set_fields("초미세먼지", pm25_set_value)
-                return True, self.set_payload(station_name + " {0} 기준 \n {1} \n".format(current_time, units), self.fields)
+                return True, self.set_payload(station_name + " {0} 기준 \n {1} \n".format(current_time, self.units), self.fields)
             else:
                 return False, 0
         except:
@@ -77,9 +106,7 @@ class Weather():
         data = self.__request(api_url)
         print(data)
         date_time = None
-        # try:
-        units =":heart_eyes:(좋아요), :thinking_face:(보통) :sob:(나쁨),:scream:(매우나쁨)"
-        #self.set_sido_fields("단위", units)
+
         for row in data['list']:
             print(row)
             city_name = row['cityName']
@@ -94,7 +121,7 @@ class Weather():
 
             value = "미세먼지 "+pm10_set_value + "\n 초미세먼지 " + pm25_set_value
             self.set_sido_fields(city_name, value)
-        return True, self.set_payload(sido_name + " {0} 기준 \n {1} \n".format(date_time,units), self.fields)
+        return True, self.set_payload(sido_name + " {0} 기준 \n {1} \n".format(date_time,self.units), self.fields)
         # except:
         #     return False, 0
 
@@ -129,9 +156,22 @@ class Weather():
         else:
             return ":scream:"
 
+    def check_city_in_eng_arr(self,sido_name):
+        if sido_name not in self.eng_list:
+            return False
+        else:
+            return True
+
+    def get_all_area_value(self,sido_name , pm10_value):
+
+        pm10_grade = self.convert_grade_to_emotion(self.convert_pm10_value_to_grade(int(pm10_value)))
+        pm10_set_value = pm10_grade + "({0}{1}) ".format(str(pm10_value), self.unit)
+        get_index = self.eng_list.index(sido_name)
+        return self.area_list[get_index] , pm10_set_value
+
     def all_area_list(self, area):
-        area_list = ['서울', '부산', '대구', '인천', '광주', '대전', '울산', '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주', '세종']
-        if area in area_list:
+
+        if area in self.area_list:
             return True
         else:
             return False
