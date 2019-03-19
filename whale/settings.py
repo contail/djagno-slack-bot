@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'events',
     'push',
     'aws',
+    'Giphy',
     'weather',
     'rest_framework',
 ]
@@ -134,3 +135,4 @@ SLACK_CLIENT_SECRET = secret_manager['SLACK_CLIENT_SECRET']
 SLACK_VERIFICATION_TOKEN = secret_manager['SLACK_VERIFICATION_TOKEN']
 SLACK_BOT_USER_TOKEN = secret_manager['SLACK_BOT_USER_TOKEN']
 OPEN_DATA_API_KEY = secret_manager['OPEN_DATA_API_KEY']
+GIPHY = secret_manager['GIPHY']

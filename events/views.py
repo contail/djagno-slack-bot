@@ -17,9 +17,9 @@ class Events(APIView):
     goobye_list = ['잘가요 ㅠㅠ', '안녕히가세요 ㅜㅜ']
     luck_list = ['오늘은 운세가 좋아요!!', '오늘은 그럭저럭이네요~~', '오늘은 최악이에요 ㅜㅜ']
     introduce = """
-    안녕하세요~ 제이름은 고래입니다 :whale:
-    현재 가능한 명령어는
-    '운세', '푸시 정보', '푸시 결과', '웹서버 몇대야', '서버 상태', '미세먼지 [지역]' 입니다.
+    안녕하세요~ 제이름은 고래입니다 :whale: \n
+    현재 가능한 명령어는 
+    '운세', '푸시 정보', '푸시 결과', '웹서버 몇대야', '서버 상태', '미세먼지 [지역]', '짤 [단어]' 입니다. \n
     지속적으로 업데이트 중입니다! 
     감사합니다~ 
     """
@@ -107,6 +107,16 @@ class Events(APIView):
                                             text=bot_text,
                                             attachments=payload['attachments'])
                             return Response(status=status.HTTP_200_OK)
+                elif '짤' in text.lower():
+                    word_split = text.split("짤")
+                    from Giphy.views import Giphy
+                    giphy = Giphy()
+                    payload = giphy.get_keyword_giphy(str(word_split[1]))
+                    Client.api_call(method='chat.postMessage',
+                                    channel=channel,
+                                    attachments=payload['attachments'])
+                    return Response(status=status.HTTP_200_OK)
+
                 Client.api_call(method='chat.postMessage',
                                 channel=channel,
                                 text=bot_text)
