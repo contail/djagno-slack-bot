@@ -26,6 +26,7 @@ pip install -r requirements.txt
 * AWS 서버 상태 확인 (CPU) / 웹서버 갯수 확인하기
 * 미세먼지 측정 (Open Api 이용 https://www.data.go.kr/dataset/15000581/openapi.do )
 * RestFul Api를 이용하여 사용하고 싶은 데이터 셋이나 결과를 Slack으로 전송 
+* Giphy를 API를 이용하여 짤 명령어 수행 (https://developers.giphy.com/)
 
 
 ### slack으로 Post 할 경우 Response 설정
