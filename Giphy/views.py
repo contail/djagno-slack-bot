@@ -20,11 +20,12 @@ class Giphy():
         try:
             data = self.api_instance.gifs_search_get(self.api_key, keyword, limit=self.limit, offset=self.offset, rating=self.rating, lang=self.lang, fmt=self.fmt)
             content = data.to_dict()
+            # print(content)
             for row in content['data']:
                 self.result_list.append(row['images']['fixed_height']['url'])
         except:
             pass
-        self.set_payload(keyword)
+        return self.set_payload(keyword)
     def set_payload(self, keyword):
         if len(self.result_list) > 0 :
             payload = {}

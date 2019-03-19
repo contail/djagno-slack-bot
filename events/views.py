@@ -112,8 +112,10 @@ class Events(APIView):
                     from Giphy.views import Giphy
                     giphy = Giphy()
                     payload = giphy.get_keyword_giphy(str(word_split[1]))
+                    bot_text = '<@{0}>'.format(user)
                     Client.api_call(method='chat.postMessage',
                                     channel=channel,
+                                    text=bot_text,
                                     attachments=payload['attachments'])
                     return Response(status=status.HTTP_200_OK)
 
